@@ -1,6 +1,6 @@
 from langgraph.graph import StateGraph, MessagesState, START, END
 from langchain_google_genai import ChatGoogleGenerativeAI
-
+from langgraph.checkpoint.memory import InMemorySaver
 import os
 from dotenv import load_dotenv
 
@@ -27,7 +27,7 @@ class ChatGraph:
 
 
     def _build_graph(self):
-
+        checkpointer = InMemorySaver()
         graph = StateGraph(MessagesState)
 
         graph.add_node("mock_llm", self._mock_llm)
@@ -35,7 +35,7 @@ class ChatGraph:
         graph.add_edge(START, "mock_llm")
         graph.add_edge("mock_llm", END)
 
-        return graph.compile()
+        return graph.compile(checkpointer=checkpointer)
 
 
     def invoke(self, user_message: str):
@@ -47,4 +47,6 @@ class ChatGraph:
                     "content": user_message
                 }
             ]
-        })
+        },
+        {"configurable":{"thread_id": "1"}}
+        )

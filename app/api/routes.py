@@ -2,7 +2,7 @@ from fastapi import APIRouter,WebSocket, WebSocketDisconnect
 from google import genai
 import os
 from dotenv import load_dotenv
-from services.llm import ChatGraph
+from app.services.llm import ChatGraph
 
 load_dotenv()
 router = APIRouter()
