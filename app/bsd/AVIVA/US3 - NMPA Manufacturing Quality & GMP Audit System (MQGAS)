@@ -1,0 +1,302 @@
+# 📘 Business Specification Document (BSD)
+
+## System Name  
+**NMPA Manufacturing Quality & GMP Audit System (MQGAS)**
+
+## Version  
+1.0
+
+## Owner  
+Manufacturing Compliance Directorate
+
+## Last Updated  
+2026-02-09
+
+---
+
+## 1. Purpose
+
+The NMPA Manufacturing Quality & GMP Audit System (MQGAS) manages the registration, inspection, auditing, and compliance enforcement of pharmaceutical and medical device manufacturing facilities.
+
+The system ensures that all manufacturing operations comply with Good Manufacturing Practice (GMP) standards and national regulatory policies.
+
+---
+
+## 2. Scope
+
+### In Scope
+- Manufacturing facility registration  
+- GMP audit scheduling  
+- Inspection reporting  
+- Quality deviation management  
+- Corrective action tracking  
+- Compliance certification  
+- Regulatory inspections  
+
+### Out of Scope
+- Production planning  
+- Supply chain logistics  
+
+---
+
+## 3. User Roles
+
+| Role              | Description                                |
+|-------------------|--------------------------------------------|
+| Manufacturer      | Registers facilities and submits records   |
+| Inspector         | Conducts GMP audits and inspections        |
+| Quality Officer   | Oversees quality compliance                |
+| Admin             | Manages system configuration               |
+
+---
+
+## 4. High-Level User Flow
+
+### 4.1 Facility Audit Flow
+
+```
+Login
+ → Register Facility
+ → Submit Quality Records
+ → Schedule Inspection
+ → On-Site Audit
+ → Audit Reporting
+ → Compliance Review
+ → Certification Decision
+ → Notification
+```
+
+### 4.2 Deviation Management Flow
+
+```
+Deviation Report
+ → Root Cause Analysis
+ → Corrective Plan
+ → Implementation
+ → Verification
+ → Closure
+```
+
+---
+
+## 5. Functional Requirements
+
+### 5.1 Facility Registration
+- Manufacturers must register each production facility.
+- Each facility must be linked to an approved manufacturer.
+- Mandatory compliance documents must be uploaded.
+- System validates facility records.
+
+### 5.2 Document Management
+- Supports PDF, DOCX, XLSX.
+- Max file size: 75 MB.
+- Maintains complete version history.
+
+### 5.3 Inspection Process
+- Inspections are assigned to certified inspectors.
+- Inspectors may issue non-compliance notices.
+- Re-inspections are supported.
+- All activities are logged.
+
+### 5.4 Certification Management
+- Decisions: Certified, Conditional, Revoked
+- Certification reports are mandatory.
+- Digital signatures required.
+
+### 5.5 Quality Monitoring
+- Deviations must be reported within 48 hours.
+- Risk levels are calculated automatically.
+- Critical violations trigger alerts.
+
+---
+
+## 6. Business Rules
+
+| Rule ID | Description                                              |
+|---------|----------------------------------------------------------|
+| BR-01   | Facilities require valid GMP certification               |
+| BR-02   | Only authorized inspectors may issue reports             |
+| BR-03   | Revoked facilities require full re-audit                 |
+| BR-04   | Critical deviations reviewed within 24 hours             |
+| BR-05   | Repeated violations trigger intensified audits           |
+
+---
+
+## 7. Data Model Overview
+
+### 7.1 Entity Relationship Summary
+
+```
+Manufacturer → Facility → Product
+Facility → Document
+Facility → Inspection → Inspector
+Facility → DeviationReport → ComplianceAction
+```
+
+---
+
+## 8. Database Schema
+
+### 8.1 manufacturers
+
+| Column           | Type         | Description               |
+|------------------|--------------|---------------------------|
+| manufacturer_id  | INT (PK)     | Unique identifier         |
+| company_name     | VARCHAR(200) | Registered company name   |
+| contact_email    | VARCHAR(150) | Primary email             |
+| license_no       | VARCHAR(50)  | Manufacturing license     |
+
+---
+
+### 8.2 facilities
+
+| Column           | Type         | Description                         |
+|------------------|--------------|-------------------------------------|
+| facility_id      | INT (PK)     | Facility identifier                 |
+| facility_name    | VARCHAR(200) | Name of facility                    |
+| location         | VARCHAR(200) | Physical address                    |
+| risk_class       | VARCHAR(50)  | Risk category                       |
+| manufacturer_id  | INT (FK)     | References manufacturers.manufacturer_id |
+
+---
+
+### 8.3 products
+
+| Column          | Type         | Description                       |
+|-----------------|--------------|-----------------------------------|
+| product_id      | INT (PK)     | Product ID                        |
+| facility_id     | INT (FK)     | Manufacturing facility            |
+| product_name    | VARCHAR(200) | Product name                      |
+| category        | VARCHAR(100) | Drug/Device/Biologic              |
+| status          | VARCHAR(50)  | Active/Suspended/Discontinued     |
+
+---
+
+### 8.4 documents
+
+| Column         | Type         | Description                 |
+|----------------|--------------|-----------------------------|
+| document_id    | INT (PK)     | Document ID                 |
+| facility_id    | INT (FK)     | Related facility            |
+| document_type  | VARCHAR(100) | SOP/Validation/Report       |
+| version        | INT          | Version number              |
+| file_path      | VARCHAR(500) | Storage path                |
+| upload_date    | DATE         | Upload date                 |
+
+---
+
+### 8.5 inspectors
+
+| Column              | Type         | Description        |
+|---------------------|--------------|--------------------|
+| inspector_id        | INT (PK)     | Inspector ID       |
+| name                | VARCHAR(150) | Inspector name     |
+| certification_level | VARCHAR(50)  | Certification tier |
+| department          | VARCHAR(100) | Department         |
+
+---
+
+### 8.6 inspections
+
+| Column          | Type        | Description           |
+|-----------------|-------------|-----------------------|
+| inspection_id   | INT (PK)    | Inspection ID         |
+| facility_id     | INT (FK)    | Facility              |
+| inspector_id    | INT (FK)    | Inspector             |
+| inspection_status| VARCHAR(50)| Pending/Passed/Failed |
+| findings        | TEXT        | Audit findings        |
+| inspection_date | DATE        | Inspection date       |
+
+---
+
+### 8.7 deviation_reports
+
+| Column        | Type        | Description          |
+|---------------|-------------|----------------------|
+| deviation_id  | INT (PK)    | Deviation ID         |
+| facility_id   | INT (FK)    | Facility             |
+| severity      | VARCHAR(50) | Minor/Major/Critical |
+| description   | TEXT        | Deviation details    |
+| reported_date | DATE        | Date reported        |
+| risk_score    | INT         | Calculated score     |
+
+---
+
+### 8.8 compliance_actions
+
+| Column          | Type        | Description             |
+|-----------------|-------------|-------------------------|
+| action_id       | INT (PK)    | Action ID               |
+| deviation_id    | INT (FK)    | Deviation report        |
+| action_type     | VARCHAR(100)| Suspension/Recall/Audit |
+| status          | VARCHAR(50) | Open/Closed             |
+| resolution_date | DATE        | Completion date         |
+
+---
+
+## 9. Non-Functional Requirements
+
+| Category     | Requirement         |
+|--------------|---------------------|
+| Performance  | 95% under 2 seconds |
+| Availability | 99.9% uptime        |
+| Security     | AES-256 encryption  |
+| Audit        | Full activity logs  |
+| Compliance   | GMP, China Data Law  |
+
+---
+
+## 10. Reporting Requirements
+
+### 10.1 Standard Reports
+
+| Report Name             | Description                     |
+|-------------------------|---------------------------------|
+| Facility Compliance     | Certification status overview   |
+| Inspection Results      | Audit pass/fail statistics      |
+| Deviation Trends        | Quality risk analysis            |
+| Inspector Performance   | Inspection turnaround metrics   |
+
+---
+
+## 11. Example Queries
+
+### Q1: Certified Facilities
+
+```sql
+SELECT *
+FROM facilities
+WHERE risk_class = 'Low';
+```
+
+### Q2: Critical Deviations by Facility
+
+```sql
+SELECT f.facility_name, COUNT(d.deviation_id) AS critical_cases
+FROM facilities f
+JOIN deviation_reports d
+ON f.facility_id = d.facility_id
+WHERE d.severity = 'Critical'
+GROUP BY f.facility_name;
+```
+
+### Q3: Inspector Workload
+
+```sql
+SELECT i.name, COUNT(ins.inspection_id) AS total_inspections
+FROM inspectors i
+JOIN inspections ins
+ON i.inspector_id = ins.inspector_id
+GROUP BY i.name;
+```
+
+---
+
+## 12. Error Handling
+
+| Scenario                 | System Behavior     |
+|--------------------------|---------------------|
+| Missing quality records  | Block registration  |
+| Invalid audit report     | Reject submission   |
+| Inspection delay         | Auto-escalation     |
+| System failure           | Rollback            |
