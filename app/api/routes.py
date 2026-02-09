@@ -25,12 +25,21 @@ def get_stories(bsd_name: str):
     stories = os.listdir(bsd_path)
     return {"stories": stories}
 
-@router.websocket("/ws/chat")
-async def model_conversation(websocket : WebSocket):
+@router.get("/get_story_content/{bsd_name}/{story_name}")
+def get_story_content(bsd_name: str, story_name: str):
+    story_path = f"app/bsd/{bsd_name}/{story_name}"
+    if not os.path.exists(story_path):
+        return {"error": "Story not found"}
+    with open(story_path, "r") as f:
+        content = f.read()
+    return {"content": content}
+
+@router.websocket("/ws/chat/{bsd_name}/{story_name}")
+async def model_conversation(websocket : WebSocket, bsd_name: str, story_name: str):
 
     await websocket.accept()
-
-    chat = ChatGraph()
+    pre_context_bsd = get_story_content(bsd_name, story_name)
+    chat = ChatGraph(pre_context=pre_context_bsd["content"])
     try:
         while True:
             user_text = await websocket.receive_text()
