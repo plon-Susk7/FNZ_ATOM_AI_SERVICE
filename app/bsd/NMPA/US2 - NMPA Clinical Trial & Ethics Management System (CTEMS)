@@ -1,0 +1,302 @@
+# 📘 Business Specification Document (BSD)
+
+## System Name  
+**NMPA Clinical Trial & Ethics Management System (CTEMS)**
+
+## Version  
+1.0
+
+## Owner  
+Clinical Research Oversight Division
+
+## Last Updated  
+2026-02-09
+
+---
+
+## 1. Purpose
+
+The NMPA Clinical Trial & Ethics Management System (CTEMS) manages the registration, monitoring, approval, and compliance review of clinical trials conducted for pharmaceutical and medical device products.
+
+The system ensures that all trials comply with ethical standards, regulatory policies, and safety requirements.
+
+---
+
+## 2. Scope
+
+### In Scope
+- Clinical trial registration  
+- Ethics committee approval  
+- Trial document submission  
+- Safety reporting  
+- Trial monitoring  
+- Participant protection  
+- Compliance auditing  
+
+### Out of Scope
+- Commercial trial funding  
+- International trial coordination  
+
+---
+
+## 3. User Roles
+
+| Role              | Description                                |
+|-------------------|--------------------------------------------|
+| Sponsor           | Registers and manages clinical trials      |
+| Reviewer          | Reviews trial protocols and reports        |
+| Ethics Officer    | Oversees ethical compliance                |
+| Admin             | Manages system configuration               |
+
+---
+
+## 4. High-Level User Flow
+
+### 4.1 Clinical Trial Registration Flow
+
+```
+Login
+ → Create Trial Record
+ → Upload Protocol
+ → Submit Application
+ → Ethics Validation
+ → Technical Review
+ → Safety Assessment
+ → Approval Decision
+ → Notification
+```
+
+### 4.2 Safety Monitoring Flow
+
+```
+Adverse Event Report
+ → Risk Evaluation
+ → Medical Review
+ → Corrective Action
+ → Resolution
+```
+
+---
+
+## 5. Functional Requirements
+
+### 5.1 Trial Registration
+- Sponsors must register each clinical trial.
+- Each trial must reference a registered product.
+- Mandatory protocols must be uploaded.
+- System validates trial completeness.
+
+### 5.2 Document Management
+- Supports PDF, DOCX, XLSX.
+- Max file size: 100 MB.
+- Maintains full audit history.
+
+### 5.3 Review Process
+- Trials are assigned to qualified reviewers.
+- Reviewers may request protocol amendments.
+- Multiple review cycles are supported.
+- All decisions are logged.
+
+### 5.4 Decision Management
+- Decisions: Approved, Rejected, Suspended
+- Ethics justification is mandatory.
+- Digital approval is required.
+
+### 5.5 Safety Monitoring
+- Adverse events must be reported within 24 hours.
+- Risk scores are calculated automatically.
+- High-risk trials generate alerts.
+
+---
+
+## 6. Business Rules
+
+| Rule ID | Description                                              |
+|---------|----------------------------------------------------------|
+| BR-01   | Trials cannot proceed without ethics approval            |
+| BR-02   | Only certified reviewers may approve protocols           |
+| BR-03   | Suspended trials require executive review                |
+| BR-04   | Serious adverse events reviewed within 24 hours          |
+| BR-05   | Trials with repeated violations are flagged              |
+
+---
+
+## 7. Data Model Overview
+
+### 7.1 Entity Relationship Summary
+
+```
+Sponsor → Trial → Product
+Trial → Document
+Trial → Review → Reviewer
+Trial → SafetyReport → ComplianceAction
+```
+
+---
+
+## 8. Database Schema
+
+### 8.1 sponsors
+
+| Column        | Type         | Description               |
+|---------------|--------------|---------------------------|
+| sponsor_id    | INT (PK)     | Unique identifier         |
+| company_name  | VARCHAR(200) | Registered organization   |
+| contact_email | VARCHAR(150) | Primary email             |
+| license_no    | VARCHAR(50)  | Regulatory license number |
+
+---
+
+### 8.2 products
+
+| Column          | Type         | Description                         |
+|-----------------|--------------|-------------------------------------|
+| product_id      | INT (PK)     | Product identifier                  |
+| product_name    | VARCHAR(200) | Name of product                     |
+| category        | VARCHAR(100) | Drug/Device/Biologic                |
+| risk_class      | VARCHAR(50)  | Risk category                       |
+| sponsor_id      | INT (FK)     | References sponsors.sponsor_id      |
+
+---
+
+### 8.3 trials
+
+| Column        | Type         | Description                       |
+|---------------|--------------|-----------------------------------|
+| trial_id      | INT (PK)     | Trial ID                          |
+| sponsor_id    | INT (FK)     | Sponsor                           |
+| product_id    | INT (FK)     | Product                           |
+| status        | VARCHAR(50)  | Draft/Submitted/Approved/Suspended|
+| start_date    | DATE         | Trial start date                  |
+| last_updated  | TIMESTAMP    | Last update time                  |
+
+---
+
+### 8.4 documents
+
+| Column       | Type         | Description              |
+|--------------|--------------|--------------------------|
+| document_id  | INT (PK)     | Document ID              |
+| trial_id     | INT (FK)     | Related trial            |
+| document_type| VARCHAR(100) | Protocol/Consent/Report  |
+| version      | INT          | Version number           |
+| file_path    | VARCHAR(500) | Storage path             |
+| upload_date  | DATE         | Upload date              |
+
+---
+
+### 8.5 reviewers
+
+| Column              | Type         | Description        |
+|---------------------|--------------|--------------------|
+| reviewer_id         | INT (PK)     | Reviewer ID        |
+| name                | VARCHAR(150) | Reviewer name      |
+| certification_level | VARCHAR(50)  | Certification tier |
+| department          | VARCHAR(100) | Department         |
+
+---
+
+### 8.6 reviews
+
+| Column       | Type        | Description      |
+|--------------|-------------|------------------|
+| review_id    | INT (PK)    | Review ID        |
+| trial_id     | INT (FK)    | Trial            |
+| reviewer_id  | INT (FK)    | Reviewer         |
+| review_status| VARCHAR(50) | Pending/Approved |
+| comments     | TEXT        | Review notes     |
+| review_date  | DATE        | Review date      |
+
+---
+
+### 8.7 safety_reports
+
+| Column        | Type        | Description          |
+|---------------|-------------|----------------------|
+| report_id     | INT (PK)    | Report ID            |
+| trial_id      | INT (FK)    | Trial                |
+| severity      | VARCHAR(50) | Minor/Major/Critical |
+| description   | TEXT        | Event details        |
+| reported_date | DATE        | Date reported        |
+| risk_score    | INT         | Calculated score     |
+
+---
+
+### 8.8 compliance_actions
+
+| Column          | Type        | Description          |
+|-----------------|-------------|----------------------|
+| action_id       | INT (PK)    | Action ID            |
+| report_id       | INT (FK)    | Safety report        |
+| action_type     | VARCHAR(100)| Inspection/Warning   |
+| status          | VARCHAR(50) | Open/Closed          |
+| resolution_date | DATE        | Completion date      |
+
+---
+
+## 9. Non-Functional Requirements
+
+| Category     | Requirement         |
+|--------------|---------------------|
+| Performance  | 95% under 2 seconds |
+| Availability | 99.9% uptime        |
+| Security     | AES-256 encryption  |
+| Audit        | Full activity logs  |
+| Compliance   | GCP, China Data Law  |
+
+---
+
+## 10. Reporting Requirements
+
+### 10.1 Standard Reports
+
+| Report Name            | Description                     |
+|------------------------|---------------------------------|
+| Active Trials          | Ongoing clinical trials         |
+| Approval Rate          | Monthly approval statistics     |
+| Safety Incidents       | Adverse event analysis           |
+| Reviewer Productivity  | Review turnaround metrics       |
+
+---
+
+## 11. Example Queries
+
+### Q1: Active Trials
+
+```sql
+SELECT *
+FROM trials
+WHERE status = 'Approved';
+```
+
+### Q2: High-Risk Safety Reports
+
+```sql
+SELECT t.trial_id, COUNT(s.report_id) AS critical_events
+FROM trials t
+JOIN safety_reports s
+ON t.trial_id = s.trial_id
+WHERE s.severity = 'Critical'
+GROUP BY t.trial_id;
+```
+
+### Q3: Reviewer Activity
+
+```sql
+SELECT r.name, COUNT(rv.review_id) AS total_reviews
+FROM reviewers r
+JOIN reviews rv
+ON r.reviewer_id = rv.reviewer_id
+GROUP BY r.name;
+```
+
+---
+
+## 12. Error Handling
+
+| Scenario              | System Behavior     |
+|-----------------------|---------------------|
+| Missing protocol      | Block submission    |
+| Invalid consent form  | Reject upload       |
+| Safety report delay   | Auto-escalation     |
+| System failure        | Rollback            |

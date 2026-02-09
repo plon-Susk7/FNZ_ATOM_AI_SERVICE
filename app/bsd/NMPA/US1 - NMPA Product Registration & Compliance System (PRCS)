@@ -1,0 +1,302 @@
+# 📘 Business Specification Document (BSD)
+
+## System Name  
+**NMPA Product Registration & Compliance System (PRCS)**
+
+## Version  
+1.0
+
+## Owner  
+Regulatory Affairs Department
+
+## Last Updated  
+2026-02-09
+
+---
+
+## 1. Purpose
+
+The NMPA Product Registration & Compliance System (PRCS) manages the submission, review, approval, and monitoring of pharmaceutical and medical device applications.
+
+The system supports manufacturers, reviewers, compliance officers, and administrators throughout the product lifecycle.
+
+---
+
+## 2. Scope
+
+### In Scope
+- New product registration  
+- Clinical trial application  
+- Technical document submission  
+- Regulatory review  
+- Approval and rejection workflows  
+- Post-market surveillance  
+- Compliance reporting  
+
+### Out of Scope
+- Financial billing  
+- International regulatory submissions  
+
+---
+
+## 3. User Roles
+
+| Role              | Description                              |
+|-------------------|------------------------------------------|
+| Applicant         | Submits applications and documents       |
+| Reviewer          | Reviews and evaluates submissions        |
+| Compliance Officer| Handles post-market monitoring           |
+| Admin             | Manages system configuration             |
+
+---
+
+## 4. High-Level User Flow
+
+### 4.1 Product Registration Flow
+
+```
+Login
+ → Create Application
+ → Upload Documents
+ → Submit Application
+ → Initial Validation
+ → Technical Review
+ → Compliance Review
+ → Final Decision
+ → Notification
+```
+
+### 4.2 Post-Market Surveillance Flow
+
+```
+Incident Report
+ → Risk Assessment
+ → Investigation
+ → Corrective Action
+ → Closure
+```
+
+---
+
+## 5. Functional Requirements
+
+### 5.1 Application Submission
+- Applicants must create a registration application.
+- Each application must reference a product.
+- Required documents must be uploaded before submission.
+- System validates completeness automatically.
+
+### 5.2 Document Management
+- Supports PDF, DOCX, XLSX.
+- Max file size: 50 MB.
+- Version history is maintained.
+
+### 5.3 Review Process
+- Applications are assigned to reviewers.
+- Reviewers can request clarifications.
+- Multiple review rounds are supported.
+- All actions are logged.
+
+### 5.4 Decision Management
+- Decisions: Approved, Rejected, Deferred
+- Justification is mandatory.
+- Digital signature required.
+
+### 5.5 Compliance Monitoring
+- Incident reports can be submitted by hospitals and manufacturers.
+- Risk scoring is calculated automatically.
+- Alerts generated for high-risk products.
+
+---
+
+## 6. Business Rules
+
+| Rule ID | Description                                           |
+|---------|-------------------------------------------------------|
+| BR-01   | Applications require mandatory documents              |
+| BR-02   | Only certified reviewers may approve applications     |
+| BR-03   | Rejected applications require 3 review notes minimum |
+| BR-04   | High-risk incidents reviewed within 48 hours          |
+| BR-05   | Products with 3 major incidents are flagged           |
+
+---
+
+## 7. Data Model Overview
+
+### 7.1 Entity Relationship Summary
+
+```
+Applicant → Application → Product
+Application → Document
+Application → Review → Reviewer
+Product → IncidentReport → ComplianceAction
+```
+
+---
+
+## 8. Database Schema
+
+### 8.1 applicants
+
+| Column          | Type         | Description             |
+|-----------------|--------------|-------------------------|
+| applicant_id    | INT (PK)     | Unique identifier       |
+| company_name    | VARCHAR(200) | Registered company name |
+| contact_email   | VARCHAR(150) | Primary email           |
+| registration_no | VARCHAR(50)  | Government registration |
+
+---
+
+### 8.2 products
+
+| Column          | Type         | Description                         |
+|-----------------|--------------|-------------------------------------|
+| product_id      | INT (PK)     | Product identifier                  |
+| product_name    | VARCHAR(200) | Name of product                     |
+| category        | VARCHAR(100) | Drug/Device/Biologic                |
+| risk_class      | VARCHAR(50)  | Risk category                       |
+| manufacturer_id | INT (FK)     | References applicants.applicant_id |
+
+---
+
+### 8.3 applications
+
+| Column          | Type         | Description                       |
+|-----------------|--------------|-----------------------------------|
+| application_id  | INT (PK)     | Application ID                    |
+| applicant_id    | INT (FK)     | Applicant                         |
+| product_id      | INT (FK)     | Product                           |
+| status          | VARCHAR(50)  | Draft/Submitted/Approved/Rejected |
+| submission_date | DATE         | Submission date                   |
+| last_updated    | TIMESTAMP    | Last update time                  |
+
+---
+
+### 8.4 documents
+
+| Column         | Type         | Description              |
+|----------------|--------------|--------------------------|
+| document_id    | INT (PK)     | Document ID              |
+| application_id | INT (FK)     | Related application      |
+| document_type  | VARCHAR(100) | Clinical/Technical/Legal |
+| version        | INT          | Version number           |
+| file_path      | VARCHAR(500) | Storage path             |
+| upload_date    | DATE         | Upload date              |
+
+---
+
+### 8.5 reviewers
+
+| Column              | Type         | Description        |
+|---------------------|--------------|--------------------|
+| reviewer_id         | INT (PK)     | Reviewer ID        |
+| name                | VARCHAR(150) | Reviewer name      |
+| certification_level | VARCHAR(50)  | Certification tier |
+| department          | VARCHAR(100) | Department         |
+
+---
+
+### 8.6 reviews
+
+| Column         | Type        | Description      |
+|----------------|-------------|------------------|
+| review_id      | INT (PK)    | Review ID        |
+| application_id | INT (FK)    | Application      |
+| reviewer_id    | INT (FK)    | Reviewer         |
+| review_status  | VARCHAR(50) | Pending/Approved |
+| comments       | TEXT        | Review notes     |
+| review_date    | DATE        | Review date      |
+
+---
+
+### 8.7 incident_reports
+
+| Column        | Type        | Description          |
+|---------------|-------------|----------------------|
+| incident_id   | INT (PK)    | Incident ID          |
+| product_id    | INT (FK)    | Product              |
+| severity      | VARCHAR(50) | Minor/Major/Critical |
+| description   | TEXT        | Details              |
+| reported_date | DATE        | Date reported        |
+| risk_score    | INT         | Calculated score     |
+
+---
+
+### 8.8 compliance_actions
+
+| Column          | Type        | Description          |
+|-----------------|-------------|----------------------|
+| action_id       | INT (PK)    | Action ID            |
+| incident_id     | INT (FK)    | Incident             |
+| action_type     | VARCHAR(100)| Recall/Audit/Warning |
+| status          | VARCHAR(50) | Open/Closed          |
+| resolution_date | DATE        | Completion date      |
+
+---
+
+## 9. Non-Functional Requirements
+
+| Category     | Requirement         |
+|--------------|---------------------|
+| Performance  | 95% under 2 seconds |
+| Availability | 99.9% uptime        |
+| Security     | AES-256 encryption  |
+| Audit        | Full activity logs  |
+| Compliance   | GDPR, China Data Law |
+
+---
+
+## 10. Reporting Requirements
+
+### 10.1 Standard Reports
+
+| Report Name          | Description                |
+|----------------------|----------------------------|
+| Pending Applications | Under-review cases         |
+| Approval Rate        | Monthly approval ratio     |
+| Incident Summary     | Risk analysis              |
+| Reviewer Performance | Review turnaround metrics  |
+
+---
+
+## 11. Example Queries
+
+### Q1: Pending Applications
+
+```sql
+SELECT *
+FROM applications
+WHERE status = 'Under Review';
+```
+
+### Q2: Products With Major Incidents
+
+```sql
+SELECT p.product_name, COUNT(i.incident_id) AS major_incidents
+FROM products p
+JOIN incident_reports i
+ON p.product_id = i.product_id
+WHERE i.severity = 'Major'
+GROUP BY p.product_name;
+```
+
+### Q3: Reviewer Workload
+
+```sql
+SELECT r.name, COUNT(rv.review_id) AS total_reviews
+FROM reviewers r
+JOIN reviews rv
+ON r.reviewer_id = rv.reviewer_id
+GROUP BY r.name;
+```
+
+---
+
+## 12. Error Handling
+
+| Scenario          | System Behavior  |
+|-------------------|------------------|
+| Missing documents | Block submission |
+| Invalid file      | Reject upload    |
+| Review timeout    | Auto-escalation  |
+| System failure    | Rollback         |
